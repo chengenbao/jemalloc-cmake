@@ -67,9 +67,9 @@ include(TestBigEndian)
 include (CheckCSourceCompiles)
 include (CTest)
 
-include(${CMAKE_SOURCE_DIR}/Utilities.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/Utilities.cmake)
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/build-aux")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build-aux")
 
 # TODO: Check the need for CONFIG
 
@@ -155,24 +155,24 @@ if(NOT CFLAGS)
         set (JEMALLOC_HAS_RESTRICT 1)
       endif()
     endif()
-    
+
     # The errors on these are not checked
     set (GFLAGS "${GFLAGS} -Wall -Werror=declaration-after-statement "
                 "-Wshorten-64-to-32 -Wsign-compare -pipe -g3")
   endif()
-  
+
   if(MSVC)
     # Restrict is #defined to _restrict
     set (JEMALLOC_HAS_RESTRICT 1)
     # The rest of MSVC flags are down below
   endif()
-  
+
   if(je_cv_cray)
     # cray compiler 8.4 has an inlining bug
     if(je_cv_cray_84)
       set (GFLAGS "${GFLAGS} -hipa2 -hnognu")
     endif(je_cv_cray_84)
-    
+
    if(enable_cc_silence)
       # ignore unreachable code warning
       set (GFLAGS "${GFLAGS} -hnomessage=128")
@@ -206,7 +206,7 @@ set(abi "elf")
 CHECK_INCLUDE_FILES (malloc.h HAVE_MALLOC_H)
 if(HAVE_MALLOC_H)
     set(JEMALLOC_USABLE_SIZE_CONST const)
-endif()    
+endif()
 
 CHECK_INCLUDE_FILES (inttypes.h HAVE_INTTYPES_H)
 CHECK_INCLUDE_FILES (stdatomic.h JEMALLOC_C11ATOMICS)
@@ -495,7 +495,7 @@ if(NOT WIN32)
   if(HAVE_SECURE_GETENV)
     set(JEMALLOC_HAVE_SECURE_GETENV 1)
   endif()
-  
+
 endif()
 
 set(JEMALLOC_HAVE_ISSETUGID 0)
@@ -525,7 +525,7 @@ if(enable-lazy-lock)
   if(NOT HAVE_DLFCN_H)
     message(FATAL_ERROR "dlfcn.h is missing")
   endif()
-  
+
   set(CMAKE_REQUIRED_LIBRARIES "dl")
   CHECK_FUNCTION_EXISTS(dlsym HAVE_DLSYM)
   if(NOT HAVE_DLSYM)
@@ -593,7 +593,7 @@ GeneratePublicSymbolsList("${PUBLIC_SYM}" "${MANGLING_MAP}" ${JEMALLOC_PREFIX}  
 foreach(public_in jemalloc_macros.h jemalloc_defs.h jemalloc_protos.h jemalloc_typedefs.h)
   ConfigureFile("${CMAKE_CURRENT_SOURCE_DIR}/include/jemalloc/${public_in}.in"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/jemalloc/${public_in}" True)
-endforeach(public_in)  
+endforeach(public_in)
 
 set(JEMALLOC_RENAME_HDR "${CMAKE_CURRENT_SOURCE_DIR}/include/jemalloc/jemalloc_rename.h")
 GenerateJemallocRename("${PUBLIC_SYM_FILE}" ${JEMALLOC_RENAME_HDR})
@@ -642,11 +642,11 @@ PrivateUnnamespace("${PRIVATE_SYM_FILE}" "${PRIVATE_UNNAMESPACE_FILE}")
 ConfigureFile("${CMAKE_CURRENT_SOURCE_DIR}/include/jemalloc/internal/jemalloc_internal.h.in"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/jemalloc/internal/jemalloc_internal.h" False)
 
-    
+
 foreach(internal_in jemalloc_internal_defs.h)
   ConfigureFile("${CMAKE_CURRENT_SOURCE_DIR}/include/jemalloc/internal/${internal_in}.in"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/jemalloc/internal/${internal_in}" True)
-endforeach(internal_in)  
+endforeach(internal_in)
 
 # Test related headers
 ConfigureFile("${CMAKE_CURRENT_SOURCE_DIR}/test/include/test/jemalloc_test_defs.h.in"
@@ -754,7 +754,7 @@ if(WIN32)
            ${PROJECT_BINARY_DIR}/Debug
            CMAKE_COMPILE_PDB_OUTPUT_DIRECTORY_RELEASE
            ${PROJECT_BINARY_DIR}/Release
-           COMPILE_PDB_NAME 
+           COMPILE_PDB_NAME
            ${LIBJEMALLOCLIB}
   )
 
@@ -798,7 +798,7 @@ if(MSVC)
   set(C_TESTLIB_UNIT_DEFS "${C_TESTLIB_UNIT_DEFS};JEMALLOC_EXPORT=")
   set(C_TESTLIB_STRESS_DEF "${C_TESTLIB_STRESS_DEF};JEMALLOC_EXPORT=")
   set(C_UNITETEST_DEFS "${C_UNITETEST_DEFS};JEMALLOC_EXPORT=")
-  
+
   # C4018 signed/unsigned mismatch in timer.c
   set(COMMON_TESTLIB_CCFLAGS /wd4018)
 endif()
@@ -847,7 +847,7 @@ set(C_TESTLIB_SRCS
 # defined
 set(C_TESTLIB_UNIT jemalloc_unit_test${install_suffix})
 add_library(${C_TESTLIB_UNIT}  STATIC ${C_TESTLIB_SRCS})
-target_include_directories(${C_TESTLIB_UNIT} PRIVATE 
+target_include_directories(${C_TESTLIB_UNIT} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/test/include)
 
 if(COMMON_TESTLIB_CCFLAGS)
@@ -862,7 +862,7 @@ target_compile_definitions(${C_TESTLIB_UNIT} PRIVATE
 # Integration test library
 set(C_TESTLIB_INTEGRATION jemalloc_int_test${install_suffix})
 add_library(${C_TESTLIB_INTEGRATION} STATIC ${C_TESTLIB_SRCS})
-target_include_directories(${C_TESTLIB_INTEGRATION} PRIVATE 
+target_include_directories(${C_TESTLIB_INTEGRATION} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/test/include)
 
 if(COMMON_TESTLIB_CCFLAGS)
@@ -901,8 +901,8 @@ foreach(sourcefile ${TESTS_STRESS})
   get_filename_component(exename ${sourcefile} NAME_WE)
   set(exename "${exename}${install_suffix}")
   add_executable(${exename} ${sourcefile})
-  
-  target_include_directories(${exename} PRIVATE 
+
+  target_include_directories(${exename} PRIVATE
       ${CMAKE_CURRENT_SOURCE_DIR}/test/include)
 
   target_compile_definitions(${exename} PRIVATE
@@ -972,22 +972,22 @@ endif()
 foreach(sourcefile ${TESTS_UNIT})
   get_filename_component(exename ${sourcefile} NAME_WE)
   set(exename "${exename}${install_suffix}")
-  add_executable(${exename} ${sourcefile}) 
-  
-  target_include_directories(${exename} PRIVATE 
+  add_executable(${exename} ${sourcefile})
+
+  target_include_directories(${exename} PRIVATE
       ${CMAKE_CURRENT_SOURCE_DIR}/test/include)
 
   if(C_UNIT_TEST_CFLAGS)
       target_compile_options(${exename} PRIVATE
           "${C_UNIT_TEST_CFLAGS}")
   endif()
-  
+
   set_target_properties(${exename}
              PROPERTIES
-             COMPILE_DEFINITIONS 
+             COMPILE_DEFINITIONS
              "${C_UNITETEST_DEFS}"
   )
-  
+
   target_link_libraries(${exename} ${C_JETLIB} ${C_TESTLIB_UNIT})
   add_test(NAME ${exename} COMMAND ${exename})
   add_dependencies(check ${exename})
@@ -1017,12 +1017,12 @@ foreach(sourcefile ${TESTS_INTEGRATION})
   set(exename "${exename}${install_suffix}")
   add_executable(${exename} ${sourcefile} $<TARGET_OBJECTS:${C_UTIL_INTEGRATION}>)
 
-  target_include_directories(${exename} PRIVATE 
+  target_include_directories(${exename} PRIVATE
       ${CMAKE_CURRENT_SOURCE_DIR}/test/include)
-  
+
   target_compile_definitions(${exename} PRIVATE
           JEMALLOC_INTEGRATION_TEST)
-  
+
   target_link_libraries(${exename} ${C_TESTLIB_INTEGRATION} ${LIBJEMALLOCSO})
 
   add_test(NAME ${exename} COMMAND ${exename})
